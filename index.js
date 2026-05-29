@@ -13,8 +13,15 @@ const wakatime = new WakaTimeClient(wakatimeApiKey);
 const octokit = new Octokit({ auth: `token ${githubToken}` });
 
 async function main() {
-  const stats = await wakatime.getMyStats({ range: RANGE.LAST_7_DAYS });
-  await updateGist(stats);
+  try {
+    console.log("正在获取 WakaTime 统计数据...");
+    const stats = await wakatime.getMyStats({ range: RANGE.LAST_7_DAYS });
+    console.log("获取到统计数据:", JSON.stringify(stats.data, null, 2));
+    await updateGist(stats);
+  } catch (error) {
+    console.error(`执行失败: ${error}`);
+    process.exit(1);
+  }
 }
 
 function trimRightStr(str, len) {
@@ -25,9 +32,12 @@ function trimRightStr(str, len) {
 async function updateGist(stats) {
   let gist;
   try {
+    console.log(`正在获取 gist: ${gistId}`);
     gist = await octokit.gists.get({ gist_id: gistId });
+    console.log("成功获取 gist");
   } catch (error) {
     console.error(`Unable to get gist\n${error}`);
+    throw error;
   }
 
   const lines = [];
@@ -45,7 +55,7 @@ async function updateGist(stats) {
       generateBarChart(percent, 16),
       String(percent.toFixed(1)).padStart(5) + "%"
     ];
-    
+
     // const line = [
     //   trimRightStr(name, 10).padEnd(10),
     //   time.padEnd(14),
@@ -56,11 +66,17 @@ async function updateGist(stats) {
     lines.push(line.join(" "));
   }
 
-  if (lines.length == 0) return;
+  if (lines.length == 0) {
+    console.log("没有语言统计数据可更新");
+    return;
+  }
+
+  console.log("准备更新 gist，内容:\n", lines.join("\n"));
 
   try {
     // Get original filename to update that same file
     const filename = Object.keys(gist.data.files)[0];
+    console.log(`更新文件名: ${filename}`);
     await octokit.gists.update({
       gist_id: gistId,
       files: {
@@ -70,8 +86,10 @@ async function updateGist(stats) {
         }
       }
     });
+    console.log("gist 更新成功！");
   } catch (error) {
     console.error(`Unable to update gist\n${error}`);
+    throw error;
   }
 }
 
