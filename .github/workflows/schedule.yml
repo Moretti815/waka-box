@@ -13,8 +13,9 @@ jobs:
         uses: moretti815/waka-box@master
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
-          GIST_ID: 551b526b9b84698d8f6ee9bdc2accd5b
+          GIST_ID: 6adec4c5cccedad78bef37ef19a16eae
           WAKATIME_API_KEY: ${{ secrets.WAKATIME_API_KEY }}
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   keepalive-workflow:
     name: Keepalive Workflow
     if: ${{ always() }}
