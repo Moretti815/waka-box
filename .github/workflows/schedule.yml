@@ -9,6 +9,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
+      
+      # ===== 新增的测试代码 开始 =====
+      - name: Test Wakatime API Key
+        env:
+          WAKATIME_API_KEY: ${{ secrets.WAKATIME_API_KEY }}
+        run: |
+          echo "正在测试 WakaTime API 密钥..."
+          # 使用 curl 发送请求测试密钥
+          RESPONSE=$(curl -s -w "\n%{http_code}" -u "$WAKATIME_API_KEY:" https://api.wakatime.com/api/v1/users/current)
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          
+          if [ "$HTTP_CODE" -eq 200 ]; then
+            echo "✅ API 密钥有效！WakaTime 连接成功。"
+          else
+            echo "❌ API 密钥无效或请求失败！HTTP 状态码: $HTTP_CODE"
+            echo "返回内容: $BODY"
+            exit 1
+          fi
+      # ===== 新增的测试代码 结束 =====
+
       - name: Update gist
         uses: moretti815/waka-box@master
         env:
@@ -16,6 +37,7 @@ jobs:
           GIST_ID: 6adec4c5cccedad78bef37ef19a16eae
           WAKATIME_API_KEY: ${{ secrets.WAKATIME_API_KEY }}
           FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+          
   keepalive-workflow:
     name: Keepalive Workflow
     if: ${{ always() }}
