@@ -11463,8 +11463,11 @@
       i.push(h.join(" "));
     }
     if (i.length == 0) {
-      console.log("没有语言统计数据可更新");
-      return;
+      console.log("没有语言统计数据可更新，显示提示信息");
+      i.push("No coding activity this week");
+      i.push("-----------------------------");
+      i.push("Please check your WakaTime");
+      i.push("plugin configuration.");
     }
     console.log("准备更新 gist，内容:\n", i.join("\n"));
     try {

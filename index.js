@@ -67,8 +67,11 @@ async function updateGist(stats) {
   }
 
   if (lines.length == 0) {
-    console.log("没有语言统计数据可更新");
-    return;
+    console.log("没有语言统计数据可更新，显示提示信息");
+    lines.push("No coding activity this week");
+    lines.push("-----------------------------");
+    lines.push("Please check your WakaTime");
+    lines.push("plugin configuration.");
   }
 
   console.log("准备更新 gist，内容:\n", lines.join("\n"));
